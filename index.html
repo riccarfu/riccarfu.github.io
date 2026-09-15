@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOB Difference Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .person {
+            margin-bottom: 10px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="date"] {
+            padding: 5px;
+        }
+
+        button {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        #results {
+            margin-top: 20px;
+        }
+
+        .result-item {
+            margin-bottom: 8px;
+            padding: 8px;
+            background: #f4f4f4;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Date of Birth Difference Calculator</h1>
+
+    <div id="people-container">
+        <div class="person">
+            <label>Person 1:</label>
+            <input type="date" class="dob">
+        </div>
+
+        <div class="person">
+            <label>Person 2:</label>
+            <input type="date" class="dob">
+        </div>
+    </div>
+
+    <button id="addPerson">Add Person</button>
+    <button id="calculate">Calculate Differences</button>
+
+    <div id="results"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
