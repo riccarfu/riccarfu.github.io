@@ -1,70 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Palindrome Age Finder</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-body {
-    font-family: Arial, sans-serif;
-    max-width: 1000px;
-    margin: 40px auto;
-    padding: 20px;
-}
+    <title>Palindrome Age Calculator</title>
 
-.person {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-}
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-button {
-    padding: 8px 14px;
-    margin-right: 8px;
-}
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            color: #222;
+        }
 
-.result {
-    margin-top: 12px;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    background: #fafafa;
-}
+        h1 {
+            margin-bottom: 10px;
+        }
 
-.pair-title {
-    font-weight: bold;
-    margin-bottom: 8px;
-}
-</style>
+        .description {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .person {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .person label {
+            width: 90px;
+        }
+
+        input[type="date"] {
+            padding: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 9px 15px;
+            margin-top: 10px;
+            margin-right: 8px;
+            border: 0;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        #addPerson {
+            background: #e5e5e5;
+        }
+
+        #calculate {
+            background: #222;
+            color: white;
+        }
+
+        #results {
+            margin-top: 30px;
+        }
+
+        .result {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 15px;
+        }
+
+        .pair-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .date-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 7px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .date-row:last-child {
+            border-bottom: none;
+        }
+
+        .date {
+            font-weight: bold;
+        }
+
+        .ages {
+            color: #666;
+        }
+    </style>
 </head>
+
 <body>
 
-<h1>Palindrome Age Finder</h1>
+    <h1>Palindrome Age Calculator</h1>
 
-<p>
-Find the previous and next two dates where two people's ages are
-digit reversals of each other (e.g. 15 ↔ 51, 24 ↔ 42, 103 ↔ 301).
-</p>
+    <p class="description">
+        Enter two or more dates of birth. The calculator finds the
+        previous palindrome-age date and the next two future dates
+        for every pair of people.
+    </p>
 
-<div id="people-container">
-    <div class="person">
-        <label>Person 1</label>
-        <input type="date" class="dob">
+    <div id="people-container">
+
+        <div class="person">
+            <label>Person 1</label>
+            <input type="date" class="dob">
+        </div>
+
+        <div class="person">
+            <label>Person 2</label>
+            <input type="date" class="dob">
+        </div>
+
     </div>
 
-    <div class="person">
-        <label>Person 2</label>
-        <input type="date" class="dob">
-    </div>
-</div>
+    <button id="addPerson">Add Person</button>
+    <button id="calculate">Calculate</button>
 
-<button id="addPerson">Add Person</button>
-<button id="calculate">Calculate</button>
+    <div id="results"></div>
 
-<div id="results"></div>
+    <script src="script.js"></script>
 
-<script src="script.js"></script>
 </body>
 </html>
