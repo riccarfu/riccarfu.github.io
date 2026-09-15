@@ -8,76 +8,133 @@ let personCount = 2;
 addPersonBtn.addEventListener("click", () => {
     personCount++;
 
-    const div = document.createElement("div");
-    div.className = "person";
+    const row = document.createElement("div");
+    row.className = "person";
 
-    div.innerHTML = `
-        <label>Person ${personCount}:</label>
+    row.innerHTML = `
+        <label>Person ${personCount}</label>
         <input type="date" class="dob">
     `;
 
-    peopleContainer.appendChild(div);
+    peopleContainer.appendChild(row);
 });
 
 calculateBtn.addEventListener("click", () => {
-    const dobInputs = document.querySelectorAll(".dob");
-
-    const dates = Array.from(dobInputs)
+    const birthDates = [...document.querySelectorAll(".dob")]
         .map(input => input.value)
-        .filter(value => value)
+        .filter(Boolean)
         .map(value => new Date(value));
 
     resultsDiv.innerHTML = "";
 
-    if (dates.length < 2) {
-        resultsDiv.innerHTML = "<p>Please enter at least two dates.</p>";
+    if (birthDates.length < 2) {
+        resultsDiv.innerHTML = "<p>Please enter at least two birth dates.</p>";
         return;
     }
 
-    for (let i = 0; i < dates.length; i++) {
-        for (let j = i + 1; j < dates.length; j++) {
-            const diff = calculateDateDifference(dates[i], dates[j]);
+    for (let i = 0; i < birthDates.length; i++) {
+        for (let j = i + 1; j < birthDates.length; j++) {
 
-            const result = document.createElement("div");
-            result.className = "result-item";
+            const match = findNextPalindromeAgeDate(
+                birthDates[i],
+                birthDates[j]
+            );
 
-            result.textContent =
-                `Person ${i + 1} ↔ Person ${j + 1}: ` +
-                `${diff.years} years, ${diff.months} months, ${diff.days} days`;
+            const card = document.createElement("div");
+            card.className = "result";
 
-            resultsDiv.appendChild(result);
+            if (match) {
+                card.innerHTML = `
+                    <div class="pair-title">
+                        Person ${i + 1} ↔ Person ${j + 1}
+                    </div>
+
+                    <div>
+                        Next palindrome-age date:
+                        <strong>${match.date}</strong>
+                    </div>
+
+                    <div>
+                        Ages:
+                        <strong>${match.age1}</strong>
+                        ↔
+                        <strong>${match.age2}</strong>
+                    </div>
+                `;
+            } else {
+                card.innerHTML = `
+                    <div class="pair-title">
+                        Person ${i + 1} ↔ Person ${j + 1}
+                    </div>
+
+                    <div>No palindrome-age date found.</div>
+                `;
+            }
+
+            resultsDiv.appendChild(card);
         }
     }
 });
 
-function calculateDateDifference(date1, date2) {
-    let older = new Date(date1);
-    let younger = new Date(date2);
+function getAgeOnDate(dob, date) {
+    let age = date.getFullYear() - dob.getFullYear();
 
-    if (older > younger) {
-        [older, younger] = [younger, older];
-    }
-
-    let years = younger.getFullYear() - older.getFullYear();
-    let months = younger.getMonth() - older.getMonth();
-    let days = younger.getDate() - older.getDate();
-
-    if (days < 0) {
-        months--;
-
-        const previousMonth = new Date(
-            younger.getFullYear(),
-            younger.getMonth(),
-            0
+    const birthdayPassed =
+        date.getMonth() > dob.getMonth() ||
+        (
+            date.getMonth() === dob.getMonth() &&
+            date.getDate() >= dob.getDate()
         );
 
-        days += previousMonth.getDate();
+    if (!birthdayPassed) {
+        age--;
     }
 
-    if (months < 0) {
-        years--;
-        months += 12;
+    return age;
+}
+
+function reverseNumber(num) {
+    return Number(
+        String(num)
+            .split("")
+            .reverse()
+            .join("")
+    );
+}
+
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+function findNextPalindromeAgeDate(dob1, dob2) {
+    const startDate = new Date();
+
+    // Search up to 200 years ahead
+    const maxDays = 200 * 365;
+
+    for (let offset = 0; offset < maxDays; offset++) {
+        const current = new Date(startDate);
+        current.setDate(startDate.getDate() + offset);
+
+        const age1 = getAgeOnDate(dob1, current);
+        const age2 = getAgeOnDate(dob2, current);
+
+        if (
+            age1 >= 0 &&
+            age2 >= 0 &&
+            reverseNumber(age1) === age2
+        ) {
+            return {
+                date: formatDate(current),
+                age1,
+                age2
+            };
+        }
     }
 
-    return { years, months, days };
+    return null;
 }
