@@ -6,14 +6,15 @@ const results = document.getElementById("results");
 let personCount = 2;
 
 
-// --------------------------------------------------
-// Add another person
-// --------------------------------------------------
+// ==================================================
+// ADD PERSON
+// ==================================================
 
 addPersonButton.addEventListener("click", () => {
     personCount++;
 
     const person = document.createElement("div");
+
     person.className = "person";
 
     person.innerHTML = `
@@ -25,99 +26,128 @@ addPersonButton.addEventListener("click", () => {
 });
 
 
-// --------------------------------------------------
-// Calculate
-// --------------------------------------------------
+// ==================================================
+// CALCULATE
+// ==================================================
 
 calculateButton.addEventListener("click", () => {
 
-    const inputs = [...document.querySelectorAll(".dob")];
-
-    const birthdays = inputs
-        .map(input => parseDate(input.value))
-        .filter(date => date !== null);
-
     results.innerHTML = "";
 
-    if (birthdays.length < 2) {
+    const inputs = [
+        ...document.querySelectorAll(".dob")
+    ];
+
+    const birthdays = inputs.map(input => {
+
+        if (!input.value) {
+            return null;
+        }
+
+        return parseDate(input.value);
+    });
+
+
+    // Make sure every person has a DOB
+
+    if (birthdays.some(date => date === null)) {
+
         results.innerHTML = `
-            <p>Please enter at least two dates of birth.</p>
+            <p class="error">
+                Please enter a date of birth for every person.
+            </p>
         `;
+
         return;
     }
+
+
+    if (birthdays.length < 2) {
+
+        results.innerHTML = `
+            <p class="error">
+                Please enter at least two people.
+            </p>
+        `;
+
+        return;
+    }
+
+
+    // Calculate every unique pair
 
     for (let i = 0; i < birthdays.length; i++) {
 
         for (let j = i + 1; j < birthdays.length; j++) {
 
-            const matches = findPalindromeDates(
+            const matches = findMatches(
                 birthdays[i],
                 birthdays[j]
             );
 
-            displayResult(i + 1, j + 1, matches);
+            displayResult(
+                i + 1,
+                j + 1,
+                matches
+            );
         }
     }
 });
 
 
-// --------------------------------------------------
-// Parse YYYY-MM-DD without timezone problems
-// --------------------------------------------------
+// ==================================================
+// PARSE DATE
+// ==================================================
+//
+// Do NOT use:
+//
+// new Date("2000-01-15")
+//
+// because timezone conversion can cause problems.
+//
+// ==================================================
 
 function parseDate(value) {
 
-    if (!value) {
-        return null;
-    }
+    const parts = value.split("-");
 
-    const [year, month, day] = value.split("-").map(Number);
+    const year = Number(parts[0]);
+    const month = Number(parts[1]);
+    const day = Number(parts[2]);
 
-    return new Date(year, month - 1, day);
+    return new Date(
+        year,
+        month - 1,
+        day
+    );
 }
 
 
-// --------------------------------------------------
-// Format DD/MM/YYYY
-// --------------------------------------------------
+// ==================================================
+// FORMAT DATE
+// ==================================================
 
 function formatDate(date) {
 
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(
+        date.getDate()
+    ).padStart(2, "0");
+
+    const month = String(
+        date.getMonth() + 1
+    ).padStart(2, "0");
+
     const year = date.getFullYear();
 
     return `${day}/${month}/${year}`;
 }
 
 
-// --------------------------------------------------
-// Get a person's age on a particular date
-// --------------------------------------------------
+// ==================================================
+// GET DATE WHEN PERSON TURNS A GIVEN AGE
+// ==================================================
 
-function getAge(dob, date) {
-
-    let age = date.getFullYear() - dob.getFullYear();
-
-    const birthdayThisYear = new Date(
-        date.getFullYear(),
-        dob.getMonth(),
-        dob.getDate()
-    );
-
-    if (date < birthdayThisYear) {
-        age--;
-    }
-
-    return age;
-}
-
-
-// --------------------------------------------------
-// Get the date someone turns a particular age
-// --------------------------------------------------
-
-function dateAtAge(dob, age) {
+function birthdayAtAge(dob, age) {
 
     return new Date(
         dob.getFullYear() + age,
@@ -127,16 +157,9 @@ function dateAtAge(dob, age) {
 }
 
 
-// --------------------------------------------------
-// Reverse an age
-//
-// 15 -> 51
-// 24 -> 42
-// 103 -> 301
-// 7 -> 7
-//
-// 04 is NOT treated as an age.
-// --------------------------------------------------
+// ==================================================
+// REVERSE AGE
+// ==================================================
 
 function reverseAge(age) {
 
@@ -149,9 +172,9 @@ function reverseAge(age) {
 }
 
 
-// --------------------------------------------------
-// Compare dates by calendar day
-// --------------------------------------------------
+// ==================================================
+// CHECK IF TWO DATES ARE THE SAME DAY
+// ==================================================
 
 function sameDate(a, b) {
 
@@ -163,44 +186,74 @@ function sameDate(a, b) {
 }
 
 
-// --------------------------------------------------
-// Find all palindrome-age dates
-// --------------------------------------------------
+// ==================================================
+// GET TODAY WITHOUT TIME
+// ==================================================
 
-function findPalindromeDates(dob1, dob2) {
+function today() {
 
-    const today = new Date();
+    const date = new Date();
 
-    // Remove the time component.
-    today.setHours(0, 0, 0, 0);
+    return new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+    );
+}
+
+
+// ==================================================
+// FIND PALINDROME AGE DATES
+// ==================================================
+
+function findMatches(dob1, dob2) {
+
+    const now = today();
 
     const matches = [];
 
     /*
-        We only need to test ages that could realistically
-        occur during the lifetimes of the two people.
+        Test every possible age.
 
-        0-150 is more than enough for normal use.
+        Example:
+
+        age1 = 15
+        reverseAge(15) = 51
+
+        Therefore we ask:
+
+        When does person 1 turn 15?
+        When does person 2 turn 51?
+
+        If those dates are identical,
+        we have a palindrome-age date.
     */
 
-    const MAX_AGE = 150;
+    const MAX_AGE = 200;
 
     for (let age1 = 0; age1 <= MAX_AGE; age1++) {
 
         const age2 = reverseAge(age1);
 
-        // Ignore impossible age combinations.
+        // Don't allow impossible ages.
         if (age2 > MAX_AGE) {
             continue;
         }
 
-        const date1 = dateAtAge(dob1, age1);
-        const date2 = dateAtAge(dob2, age2);
 
-        /*
-            Both people must reach their respective ages
-            on exactly the same calendar date.
-        */
+        const date1 = birthdayAtAge(
+            dob1,
+            age1
+        );
+
+        const date2 = birthdayAtAge(
+            dob2,
+            age2
+        );
+
+
+        // Both people must reach their ages
+        // on exactly the same date.
 
         if (sameDate(date1, date2)) {
 
@@ -212,40 +265,69 @@ function findPalindromeDates(dob1, dob2) {
         }
     }
 
-    // Sort chronologically.
-    matches.sort((a, b) => a.date - b.date);
+
+    // Sort chronologically
+
+    matches.sort(
+        (a, b) => a.date - b.date
+    );
 
 
-    // --------------------------------------------------
-    // Separate past and future
-    // --------------------------------------------------
+    // Remove duplicate dates
 
-    const past = matches.filter(match => match.date < today);
+    const uniqueMatches = [];
 
-    const future = matches.filter(match => match.date >= today);
+    for (const match of matches) {
+
+        const alreadyExists = uniqueMatches.some(
+            existing => sameDate(
+                existing.date,
+                match.date
+            )
+        );
+
+        if (!alreadyExists) {
+            uniqueMatches.push(match);
+        }
+    }
+
+
+    // Previous
+
+    let previous = null;
+
+    for (const match of uniqueMatches) {
+
+        if (match.date < now) {
+            previous = match;
+        }
+    }
+
+
+    // Future dates
+
+    const future = uniqueMatches.filter(
+        match => match.date >= now
+    );
 
 
     return {
-        previous: past.length > 0
-            ? past[past.length - 1]
-            : null,
-
-        next: future.length > 0
-            ? future[0]
-            : null,
-
-        next2: future.length > 1
-            ? future[1]
-            : null
+        previous: previous,
+        next: future[0] || null,
+        next2: future[1] || null
     };
 }
 
 
-// --------------------------------------------------
-// Display result
-// --------------------------------------------------
+// ==================================================
+// DISPLAY RESULTS
+// ==================================================
 
-function displayResult(person1, person2, matches) {
+function displayResult(
+    person1,
+    person2,
+    matches
+) {
 
     const result = document.createElement("div");
 
@@ -256,17 +338,17 @@ function displayResult(person1, person2, matches) {
             Person ${person1} ↔ Person ${person2}
         </div>
 
-        ${createDateRow(
+        ${createRow(
             "Previous",
             matches.previous
         )}
 
-        ${createDateRow(
+        ${createRow(
             "Next",
             matches.next
         )}
 
-        ${createDateRow(
+        ${createRow(
             "Next after",
             matches.next2
         )}
@@ -276,11 +358,11 @@ function displayResult(person1, person2, matches) {
 }
 
 
-// --------------------------------------------------
-// Create one result row
-// --------------------------------------------------
+// ==================================================
+// CREATE RESULT ROW
+// ==================================================
 
-function createDateRow(label, match) {
+function createRow(label, match) {
 
     if (!match) {
 
@@ -292,19 +374,26 @@ function createDateRow(label, match) {
         `;
     }
 
+
     return `
         <div class="date-row">
-            <span>${label}</span>
 
             <span>
+                ${label}
+            </span>
+
+            <span>
+
                 <span class="date">
                     ${formatDate(match.date)}
                 </span>
 
                 <span class="ages">
-                    (${match.age1} ↔ ${match.age2})
+                    ${match.age1} ↔ ${match.age2}
                 </span>
+
             </span>
+
         </div>
     `;
 }

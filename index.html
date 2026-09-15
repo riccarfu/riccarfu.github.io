@@ -20,12 +20,13 @@
         }
 
         h1 {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .description {
             color: #666;
             margin-bottom: 25px;
+            line-height: 1.5;
         }
 
         .person {
@@ -48,7 +49,7 @@
             padding: 9px 15px;
             margin-top: 10px;
             margin-right: 8px;
-            border: 0;
+            border: none;
             border-radius: 5px;
             cursor: pointer;
             font-size: 15px;
@@ -81,9 +82,9 @@
         }
 
         .date-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 7px 0;
+            display: grid;
+            grid-template-columns: 130px 1fr;
+            padding: 9px 0;
             border-bottom: 1px solid #eee;
         }
 
@@ -97,6 +98,11 @@
 
         .ages {
             color: #666;
+            margin-left: 8px;
+        }
+
+        .error {
+            color: #b00020;
         }
     </style>
 </head>
@@ -106,9 +112,9 @@
     <h1>Palindrome Age Calculator</h1>
 
     <p class="description">
-        Enter two or more dates of birth. The calculator finds the
-        previous palindrome-age date and the next two future dates
-        for every pair of people.
+        Enter two or more dates of birth. For every pair of people,
+        the calculator finds the most recent palindrome-age date
+        and the next two.
     </p>
 
     <div id="people-container">
