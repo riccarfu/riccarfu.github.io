@@ -13,7 +13,7 @@
 
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 850px;
             margin: 40px auto;
             padding: 20px;
             color: #222;
@@ -25,8 +25,8 @@
 
         .description {
             color: #666;
-            margin-bottom: 25px;
             line-height: 1.5;
+            margin-bottom: 25px;
         }
 
         .person {
@@ -84,7 +84,7 @@
         .date-row {
             display: grid;
             grid-template-columns: 130px 1fr;
-            padding: 9px 0;
+            padding: 10px 0;
             border-bottom: 1px solid #eee;
         }
 
@@ -101,6 +101,12 @@
             margin-left: 8px;
         }
 
+        .period {
+            color: #888;
+            font-size: 13px;
+            margin-left: 8px;
+        }
+
         .error {
             color: #b00020;
         }
@@ -113,8 +119,8 @@
 
     <p class="description">
         Enter two or more dates of birth. For every pair of people,
-        the calculator finds the most recent palindrome-age date
-        and the next two.
+        the calculator finds the most recent palindrome-age period
+        and the next two palindrome-age periods.
     </p>
 
     <div id="people-container">
