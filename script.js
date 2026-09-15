@@ -8,34 +8,37 @@ let personCount = 2;
 addPersonBtn.addEventListener("click", () => {
     personCount++;
 
-    const row = document.createElement("div");
-    row.className = "person";
+    const div = document.createElement("div");
+    div.className = "person";
 
-    row.innerHTML = `
+    div.innerHTML = `
         <label>Person ${personCount}</label>
         <input type="date" class="dob">
     `;
 
-    peopleContainer.appendChild(row);
+    peopleContainer.appendChild(div);
 });
 
-calculateBtn.addEventListener("click", () => {
+calculateBtn.addEventListener("click", runCalculation);
+
+function runCalculation() {
     const birthDates = [...document.querySelectorAll(".dob")]
-        .map(input => input.value)
+        .map(x => x.value)
         .filter(Boolean)
-        .map(value => new Date(value));
+        .map(x => new Date(x));
 
     resultsDiv.innerHTML = "";
 
     if (birthDates.length < 2) {
-        resultsDiv.innerHTML = "<p>Please enter at least two birth dates.</p>";
+        resultsDiv.innerHTML =
+            "<p>Please enter at least two birth dates.</p>";
         return;
     }
 
     for (let i = 0; i < birthDates.length; i++) {
         for (let j = i + 1; j < birthDates.length; j++) {
 
-            const match = findNextPalindromeAgeDate(
+            const matches = findPalindromeMatches(
                 birthDates[i],
                 birthDates[j]
             );
@@ -43,98 +46,107 @@ calculateBtn.addEventListener("click", () => {
             const card = document.createElement("div");
             card.className = "result";
 
-            if (match) {
-                card.innerHTML = `
-                    <div class="pair-title">
-                        Person ${i + 1} ↔ Person ${j + 1}
-                    </div>
+            card.innerHTML = `
+                <div class="pair-title">
+                    Person ${i + 1} ↔ Person ${j + 1}
+                </div>
 
-                    <div>
-                        Next palindrome-age date:
-                        <strong>${match.date}</strong>
-                    </div>
+                <div>
+                    <strong>Previous:</strong>
+                    ${formatMatch(matches.previous)}
+                </div>
 
-                    <div>
-                        Ages:
-                        <strong>${match.age1}</strong>
-                        ↔
-                        <strong>${match.age2}</strong>
-                    </div>
-                `;
-            } else {
-                card.innerHTML = `
-                    <div class="pair-title">
-                        Person ${i + 1} ↔ Person ${j + 1}
-                    </div>
+                <div>
+                    <strong>Next:</strong>
+                    ${formatMatch(matches.next)}
+                </div>
 
-                    <div>No palindrome-age date found.</div>
-                `;
-            }
+                <div>
+                    <strong>Next After:</strong>
+                    ${formatMatch(matches.next2)}
+                </div>
+            `;
 
             resultsDiv.appendChild(card);
         }
     }
-});
-
-function getAgeOnDate(dob, date) {
-    let age = date.getFullYear() - dob.getFullYear();
-
-    const birthdayPassed =
-        date.getMonth() > dob.getMonth() ||
-        (
-            date.getMonth() === dob.getMonth() &&
-            date.getDate() >= dob.getDate()
-        );
-
-    if (!birthdayPassed) {
-        age--;
-    }
-
-    return age;
 }
 
-function reverseNumber(num) {
-    return Number(
-        String(num)
-            .split("")
-            .reverse()
-            .join("")
-    );
+function formatMatch(match) {
+    if (!match) return "None";
+
+    return `${formatDate(match.date)}
+            (${match.age1} ↔ ${match.age2})`;
 }
 
 function formatDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const y = date.getFullYear();
 
-    return `${year}-${month}-${day}`;
+    return `${d}/${m}/${y}`;
 }
 
-function findNextPalindromeAgeDate(dob1, dob2) {
-    const startDate = new Date();
+function reverseAge(age) {
+    return Number(String(age).split("").reverse().join(""));
+}
 
-    // Search up to 200 years ahead
-    const maxDays = 200 * 365;
+function sameDay(a, b) {
+    return (
+        a.getFullYear() === b.getFullYear() &&
+        a.getMonth() === b.getMonth() &&
+        a.getDate() === b.getDate()
+    );
+}
 
-    for (let offset = 0; offset < maxDays; offset++) {
-        const current = new Date(startDate);
-        current.setDate(startDate.getDate() + offset);
+function addYears(date, years) {
+    const d = new Date(date);
+    d.setFullYear(d.getFullYear() + years);
+    return d;
+}
 
-        const age1 = getAgeOnDate(dob1, current);
-        const age2 = getAgeOnDate(dob2, current);
+function findPalindromeMatches(dob1, dob2) {
 
-        if (
-            age1 >= 0 &&
-            age2 >= 0 &&
-            reverseNumber(age1) === age2
-        ) {
-            return {
-                date: formatDate(current),
+    const today = new Date();
+
+    const matches = [];
+
+    const MAX_AGE = 1500;
+
+    for (let age1 = 0; age1 <= MAX_AGE; age1++) {
+
+        const age2 = reverseAge(age1);
+
+        if (age2 > MAX_AGE) continue;
+
+        const date1 = addYears(dob1, age1);
+        const date2 = addYears(dob2, age2);
+
+        if (sameDay(date1, date2)) {
+            matches.push({
+                date: date1,
                 age1,
                 age2
-            };
+            });
         }
     }
 
-    return null;
+    matches.sort((a, b) => a.date - b.date);
+
+    const past = matches.filter(x => x.date < today);
+    const future = matches.filter(x => x.date >= today);
+
+    return {
+        previous: past.length
+            ? past[past.length - 1]
+            : null,
+
+        next: future.length
+            ? future[0]
+            : null,
+
+        next2: future.length > 1
+            ? future[1]
+            : null
+    };
 }
